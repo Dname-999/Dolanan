@@ -1,0 +1,60 @@
+<!DOCTYPE html><html><head><meta name=viewport content="width=device-width,initial-scale=1">
+<style>
+html,body{margin:0;padding:0;background:#020a14;color:#4da6ff;font-family:monospace}
+.box{margin:4px;border:2px solid #0090ff;border-radius:14px;padding:8px;background:#081a2e}
+h1{font-size:13px;text-align:center;margin:4px;color:#0090ff}
+.tabs{display:flex;gap:4px}.tab{flex:1;padding:8px;border-radius:8px;border:0;font-weight:bold}
+.on{background:#0090ff;color:#000}.off{background:#1a2a3a;color:#7aa}
+.info{font-size:9px;background:#020f22;padding:8px;border-radius:8px;border:1px solid #0090ff;margin:6px 0}
+.inp{width:100%;background:#fff;color:#000;border:2px solid #0090ff;border-radius:8px;padding:10px;font-weight:bold;font-family:monospace;box-sizing:border-box}
+.row{display:flex;justify-content:space-between;color:#fff;font-weight:bold;font-size:11px;margin:6px 0}
+.hash{font-size:7px;background:#020f22;padding:4px;border-radius:4px;word-break:break-all;margin:4px 0;color:#5af}
+.btn{width:100%;padding:14px;background:#0090ff;color:#000;font-weight:bold;font-size:16px;border:0;border-radius:10px}
+.log{height:150px;overflow:auto;background:#020f22;font-size:9px;padding:6px;border-radius:6px;border:1px solid #0a2a4a;margin-top:6px;line-height:13px;color:#0f0}
+</style></head><body>
+<div class=box>
+<h1>⚡ FUUNN ASIC V1 - 200 TH/s</h1>
+<div class=tabs><button id=btc class="tab on">BTC</button><button id=doge class="tab off">DOGE</button><button id=prog class="tab off">PROG</button></div>
+<div class=info>Wallet <span id=wl>BTC</span>:<br><input id=w class=inp value="bc1p778nn2abc123frc8x5" placeholder="Tempel wallet asli disini"><br>CHIP: 128 CORES | 1.2GHz | TARGET: 19 zeros</div>
+<div class=row><span>H/s <b id=hs style=color:#0ff>0 TH/s</b></span><span>Nonce <b id=nn>8415650</b></span><span>Best <b id=bs>0z</b></span></div>
+<div class=hash id=hh>0000000000000000...</div>
+<button id=go class=btn>▶ START ASIC</button>
+<div style=font-size:9px;margin-top:4px>Temp <b id=tp>42°C</b> | Power 3420W | Fan <b id=fn>4800 RPM</b></div>
+<div id=lg class=log>> Ready - Tap wallet untuk ubah<br>> Tap START untuk mining<br></div>
+</div>
+<script>
+let R=0,N=8415650,B=0,T=0,C='BTC',t0=0;
+let w=document.getElementById('w'),go=document.getElementById('go'),lg=document.getElementById('lg'),hh=document.getElementById('hh');
+function L(m){lg.innerHTML='> '+m+'<br>'+lg.innerHTML}
+function H(z){let s='0'.repeat(z);for(let i=0;i<64-z;i++)s+=Math.floor(Math.random()*16).toString(16);return s}
+function loop(){
+ if(!R)return;
+ T+=128000000000;N+=128;
+ document.getElementById('nn').innerText=N.toLocaleString();
+ let r=Math.random(),z=0;
+ if(r>0.5)z=4;if(r>0.7)z=6;if(r>0.85)z=8;if(r>0.94)z=10;if(r>0.99)z=12;
+ let h=H(z);hh.innerText=h;
+ if(z>B){B=z;document.getElementById('bs').innerText=B+'z'}
+ if(z>=4)L('['+C+' '+w.value.slice(0,6)+'] '+z+' zeros '+h.slice(0,12));
+ let e=(Date.now()-t0)/1000;
+ if(e>0)document.getElementById('hs').innerText=(T/e/1e12).toFixed(2)+' TH/s';
+ document.getElementById('tp').innerText=(42+Math.floor(Math.random()*8))+'°C';
+ document.getElementById('fn').innerText=(4600+Math.floor(Math.random()*400))+' RPM';
+ setTimeout(loop,40);
+}
+go.onclick=()=>{
+ if(!R){
+  if(w.value.length<5){alert('Isi wallet dulu FuNn!');return}
+  R=1;t0=Date.now();T=0;B=0;
+  go.innerText='⏹ STOP MINING - '+C;
+  go.style.background='#ff3333';
+  L('ASIC ON 128 cores Wallet:'+w.value);
+  loop();
+ }else{
+  R=0;go.innerText='▶ START ASIC - '+C;go.style.background='#0090ff';L('OFF Best '+B+' zeros');
+ }
+};
+document.getElementById('btc').onclick=()=>{C='BTC';document.getElementById('btc').className='tab on';document.getElementById('doge').className='tab off';document.getElementById('wl').innerText='BTC';L('Switch BTC')};
+document.getElementById('doge').onclick=()=>{C='DOGE';document.getElementById('doge').className='tab on';document.getElementById('btc').className='tab off';document.getElementById('wl').innerText='DOGE';L('Switch DOGE')};
+document.getElementById('prog').onclick=()=>{L('Verilog: sha256_core 128x parallel')};
+</script></body></html>
