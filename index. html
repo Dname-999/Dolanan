@@ -1,0 +1,51 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DOLANAN SHOOTER</title>
+<style>body{margin:0;background:#050a14;color:#fff;font-family:monospace;overflow:hidden}canvas{width:100vw;height:100vh;display:block;background:#0a1428}
+#ui{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px;z-index:10}
+.hud{border:1px solid #0ff;padding:6px 10px;border-radius:8px;background:rgba(0,255,255,0.1);font-size:12px}
+#mid{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:20;background:rgba(0,0,0,0.85);padding:20px;border-radius:16px;border:1px solid #0ff;width:90%;max-width:300px}
+#mid h1{color:#0ff;margin:0 0 10px}
+#playBtn{background:#0ff;color:#000;border:none;padding:15px 25px;border-radius:30px;font-weight:bold;font-size:18px;width:100%;margin-top:10px}
+#walletBtn{position:fixed;top:60px;right:10px;z-index:30;background:#0ff;color:#000;border:none;padding:8px 12px;border-radius:20px;font-weight:bold}
+#wp{position:fixed;top:100px;right:10px;z-index:30;background:#000;border:1px solid #0ff;padding:12px;border-radius:12px;width:280px;display:none}
+#wp.show{display:block}
+#wp input{width:100%;padding:10px;margin:5px 0;background:#0a1428;border:1px solid #0ff;color:#fff;border-radius:8px}
+#wp button{width:100%;padding:10px;background:#0ff;color:#000;border:none;border-radius:8px;font-weight:bold;margin-top:5px}
+#joy{position:fixed;bottom:20px;left:0;right:0;display:flex;justify-content:space-between;padding:0 20px;z-index:10}
+.jb{width:80px;height:80px;border-radius:50%;border:2px solid #0ff;background:rgba(255,255,255,0.1);color:#0ff;font-size:30px;display:flex;align-items:center;justify-content:center}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="ui"><div class="hud">SCORE:<b id="sc">0</b><br>BTC:<b id="bt">0.00000000</b></div><div class="hud">LIVES:<b id="lv">3</b><br><span id="ws">NOT SET</span></div></div>
+<button id="walletBtn" onclick="document.getElementById('wp').classList.toggle('show')">⚙️ WALLET</button>
+<div id="wp"><b style="color:#0ff">💰 WALLET SETTING</b><br><small>BTC Address bisa diubah disini</small>
+<input id="addr" placeholder="bc1q..."><input id="name" placeholder="Dname-999">
+<button onclick="saveW()">SAVE ✅</button><p id="msg" style="color:#0f0;display:none;font-size:12px">Tersimpan!</p></div>
+<div id="mid"><h1>DOLANAN SHOOTER</h1><p>Tembak = Mining BTC</p><p style="font-size:11px;opacity:0.7">Geser jari kiri-kanan</p><button id="playBtn" onclick="start()">▶️ PLAY NOW</button></div>
+<div id="joy"><div class="jb" id="L">◀</div><div class="jb" id="R">▶</div></div>
+<script>
+let W,H,c=document.getElementById('c'),x=c.getContext('2d'),sc=0,lv=3,btc=0,run=false,p={x:0,y:0},b=[],e=[],last=0,et=0,st=0,lh=false,rh=false;
+function RS(){W=c.width=innerWidth;H=c.height=innerHeight;p.x=W/2;p.y=H-120}RS();onresize=RS;
+let WAL=JSON.parse(localStorage.getItem('dw')||'{"a":"","n":""}');addr.value=WAL.a;name.value=WAL.n;upd();
+function upd(){ws.textContent=WAL.a?WAL.a.slice(0,6)+'...'+WAL.a.slice(-4):'NOT SET'}
+function saveW(){WAL.a=addr.value.trim();WAL.n=name.value.trim();localStorage.setItem('dw',JSON.stringify(WAL));upd();msg.style.display='block';setTimeout(()=>msg.style.display='none',1500);wp.classList.remove('show')}
+function start(){sc=0;btc=0;lv=3;b=[];e=[];run=true;mid.style.display='none';requestAnimationFrame(LP);scE.textContent=0;btE.textContent='0.00000000';lvE.textContent=3}
+let scE=document.getElementById('sc'),btE=document.getElementById('bt'),lvE=document.getElementById('lv');
+function LP(t){if(!run)return;if(!last)last=t;let dt=t-last;last=t;UP(dt);DR();requestAnimationFrame(LP)}
+function UP(dt){
+if(lh)p.x-=8;if(rh)p.x+=8;p.x=Math.max(30,Math.min(W-30,p.x));
+st+=dt;if(st>200){b.push({x:p.x,y:p.y-20,vy:-10});st=0}
+et+=dt;if(et>800){e.push({x:Math.random()*(W-60)+30,y:-20,vy:2+Math.random()*2});et=0}
+b.forEach((B,i)=>{B.y+=B.vy;if(B.y<0)b.splice(i,1)});
+e.forEach((E,ei)=>{E.y+=E.vy;if(E.y>H){e.splice(ei,1);lv--;lvE.textContent=lv;if(lv<=0)over()}
+b.forEach((B,bi)=>{if(Math.abs(B.x-E.x)<20&&Math.abs(B.y-E.y)<20){b.splice(bi,1);e.splice(ei,1);sc+=10;btc+=0.00000001;scE.textContent=sc;btE.textContent=btc.toFixed(8)}});
+if(Math.abs(p.x-E.x)<30&&Math.abs(p.y-E.y)<30){e.splice(ei,1);lv--;lvE.textContent=lv;if(lv<=0)over()}
+});}
+function DR(){x.clearRect(0,0,W,H);x.fillStyle='rgba(255,255,255,0.2)';for(let i=0;i<40;i++)x.fillRect((i*137)%W,(i*197+Date.now()*0.05)%H,2,2);
+x.save();x.translate(p.x,p.y);x.fillStyle='#0ff';x.shadowColor='#0ff';x.shadowBlur=15;x.beginPath();x.moveTo(0,-20);x.lineTo(-20,20);x.lineTo(20,20);x.closePath();x.fill();x.restore();
+x.fillStyle='#ff0';b.forEach(B=>x.fillRect(B.x-2,B.y-6,4,10));
+e.forEach(E=>{x.fillStyle='#f04';x.beginPath();x.arc(E.x,E.y,18,0,6.28);x.fill();x.fillStyle='#fff';x.fillRect(E.x-8,E.y-3,16,6)});}
+function over(){run=false;mid.style.display='block';mid.innerHTML='<h1>GAME OVER</h1><p>Score:'+sc+'<br>BTC:'+btc.toFixed(8)+'<br>Wallet:'+(WAL.a||'NOT SET')+'</p><button id="playBtn" onclick="start()">🔁 PLAY AGAIN</button>'}
+L.ontouchstart=e=>{e.preventDefault();lh=true};L.ontouchend=()=>lh=false;
+R.ontouchstart=e=>{e.preventDefault();rh=true};R.ontouchend=()=>rh=false;
+c.ontouchmove=e=>{e.preventDefault();p.x=e.touches[0].clientX};
+</script></body></html>
